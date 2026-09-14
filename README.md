@@ -28,9 +28,12 @@ Update with `brew upgrade --cask <cask>`; remove with `brew uninstall --cask --z
 | [`nosleep`](Casks/nosleep.rb) | [NoSleep](https://github.com/sergio-farfan/nosleep) — menu bar toggle for `caffeinate` that prevents idle sleep |
 
 AltTab releases are ad-hoc signed and not yet notarized: on first launch macOS blocks the
-app — allow it once in **System Settings → Privacy & Security → Open Anyway**. The app also
-needs the **Accessibility** permission, which macOS asks for again after each update
-(ad-hoc identities change per build).
+app — allow it in **System Settings → Privacy & Security → Open Anyway**. Expect that step
+again after each `brew upgrade` of an ad-hoc-signed app: Homebrew carries a Gatekeeper
+approval forward only when the new build still satisfies the previous designated
+requirement, and an ad-hoc signature's requirement is a per-build `cdhash`. AltTab also needs
+the **Accessibility** permission, which macOS asks for again after each update for the same
+reason (ad-hoc identities change per build).
 
 NoSleep releases are ad-hoc signed as well (same first-launch step; Homebrew ≥ 7 has no
 `--no-quarantine` option — approve once, or `xattr -dr com.apple.quarantine /Applications/NoSleep.app`). NoSleep asks for
