@@ -12,27 +12,25 @@ cask "alttab" do
     strategy :github_latest
   end
 
-  depends_on macos: ">= :ventura"
+  # lwouis/alt-tab-macos (homebrew/cask token "alt-tab") also installs /Applications/AltTab.app.
+  conflicts_with cask: "alt-tab"
+  depends_on macos: :ventura
 
   app "AltTab.app"
 
   uninstall quit: "com.alttab.app"
 
-  zap trash: [
-    "~/Library/Preferences/com.alttab.app.plist",
-  ]
+  zap trash: "~/Library/Preferences/com.alttab.app.plist"
 
   caveats do
+    unsigned_accessibility
     <<~EOS
-      AltTab releases are not yet notarized. If macOS blocks the first launch,
-      either right-click AltTab.app -> Open, or install without quarantine:
+      AltTab releases are ad-hoc signed and not notarized, so Gatekeeper blocks
+      the first launch. Allow it once in System Settings -> Privacy & Security ->
+      "Open Anyway", then launch again.
 
-        brew install --cask --no-quarantine sergio-farfan/tap/alttab
-
-      AltTab needs the Accessibility permission (System Settings -> Privacy &
-      Security -> Accessibility). Because releases are ad-hoc signed, macOS
-      re-prompts for that permission once after every update; if the toggle
-      looks stuck ON but Option-Tab is dead:
+      If Option-Tab stops working after an update while the Accessibility toggle
+      is still on:
 
         tccutil reset Accessibility com.alttab.app
     EOS

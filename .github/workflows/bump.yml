@@ -1,0 +1,127 @@
+name: brew bump
+
+# Bumps a cask to a released version. Triggered by the app repository's release
+# workflow (repository_dispatch with {cask, version, sha256}) or by hand.
+# Validates the bumped tap before pushing; a no-op when the cask is already at
+# the requested version.
+
+on:
+  repository_dispatch:
+    types: [alttab-release]
+  workflow_dispatch:
+    inputs:
+      cask:
+        description: "Cask token"
+        required: true
+        default: alttab
+      version:
+        description: "New version (no v prefix)"
+        required: true
+      sha256:
+        description: "SHA-256 of the release asset"
+        required: true
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash -xeuo pipefail {0}
+
+jobs:
+  bump:
+    runs-on: macos-26
+    permissions:
+      contents: write
+    steps:
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@f8d4222eb633e65c2a0157383cf80861fc7fae7f # 2026.09.07.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cache Homebrew Bundler RubyGems
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ steps.set-up-homebrew.outputs.gems-path }}
+          key: macos-26-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
+          restore-keys: macos-26-rubygems-
+
+      - name: Set up git
+        id: git-setup
+        uses: Homebrew/actions/git-user-config@f8d4222eb633e65c2a0157383cf80861fc7fae7f # 2026.09.07.1
+
+      - name: Resolve and validate the request
+        id: req
+        env:
+          EVENT: ${{ github.event_name }}
+          IN_CASK: ${{ github.event.inputs.cask }}
+          IN_VERSION: ${{ github.event.inputs.version }}
+          IN_SHA: ${{ github.event.inputs.sha256 }}
+          CP_CASK: ${{ github.event.client_payload.cask }}
+          CP_VERSION: ${{ github.event.client_payload.version }}
+          CP_SHA: ${{ github.event.client_payload.sha256 }}
+        run: |
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            CASK="$IN_CASK"; VERSION="$IN_VERSION"; SHA="$IN_SHA"
+          else
+            CASK="${CP_CASK:-alttab}"; VERSION="$CP_VERSION"; SHA="$CP_SHA"
+          fi
+          # Reject anything that isn't a plain token / version / hex digest before
+          # it reaches a shell command.
+          printf '%s' "$CASK"    | grep -Eq '^[a-z0-9-]+$' || { echo "bad cask token: $CASK"; exit 1; }
+          printf '%s' "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$' || { echo "bad version: $VERSION"; exit 1; }
+          printf '%s' "$SHA"     | grep -Eq '^[0-9a-f]{64}$' || { echo "bad sha256: $SHA"; exit 1; }
+          {
+            echo "cask=$CASK"
+            echo "version=$VERSION"
+            echo "sha256=$SHA"
+          } >> "$GITHUB_OUTPUT"
+
+      # Cleanup/setup BEFORE editing: cleanup-before resets the tap checkout and
+      # would discard a fresh local commit.
+      - run: brew test-bot --only-cleanup-before
+
+      - run: brew test-bot --only-setup
+
+      - name: Bump cask
+        id: bump
+        env:
+          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HOMEBREW_GIT_COMMITTER_NAME: ${{ steps.git-setup.outputs.name }}
+          HOMEBREW_GIT_COMMITTER_EMAIL: ${{ steps.git-setup.outputs.email }}
+          TAP_NAME: ${{ steps.set-up-homebrew.outputs.tap-name }}
+          CASK: ${{ steps.req.outputs.cask }}
+          VERSION: ${{ steps.req.outputs.version }}
+          SHA256: ${{ steps.req.outputs.sha256 }}
+        run: |
+          current="$(brew info --cask --json=v2 "$TAP_NAME/$CASK" | jq -r '.casks[0].version')"
+          if [ "$current" = "$VERSION" ]; then
+            echo "$CASK is already at $VERSION - nothing to do"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          brew bump-cask-pr --write-only --commit \
+            --version "$VERSION" --sha256 "$SHA256" "$TAP_NAME/$CASK"
+          {
+            echo "changed=true"
+            echo "path=$(brew --repository "$TAP_NAME")"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Validate the bumped tap
+        if: steps.bump.outputs.changed == 'true'
+        env:
+          TAP_NAME: ${{ steps.set-up-homebrew.outputs.tap-name }}
+          CASK: ${{ steps.req.outputs.cask }}
+        run: |
+          brew test-bot --only-tap-syntax
+          brew audit --cask --online --strict --tap "$TAP_NAME"
+          brew install --cask "$TAP_NAME/$CASK"
+          brew uninstall --cask --zap "$CASK"
+
+      - name: Push
+        if: steps.bump.outputs.changed == 'true'
+        uses: Homebrew/actions/git-try-push@f8d4222eb633e65c2a0157383cf80861fc7fae7f # 2026.09.07.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          directory: ${{ steps.bump.outputs.path }}
+          branch: main
