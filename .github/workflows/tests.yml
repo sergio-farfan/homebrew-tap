@@ -45,5 +45,7 @@ jobs:
         env:
           TAP_NAME: ${{ steps.set-up-homebrew.outputs.tap-name }}
         run: |
-          brew install --cask "$TAP_NAME/alttab"
-          brew uninstall --cask --zap alttab
+          for cask in alttab nosleep; do
+            brew install --cask "$TAP_NAME/$cask"
+            brew uninstall --cask --zap "$cask"
+          done

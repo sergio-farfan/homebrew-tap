@@ -7,7 +7,7 @@ name: brew bump
 
 on:
   repository_dispatch:
-    types: [alttab-release]
+    types: [alttab-release, nosleep-release]
   workflow_dispatch:
     inputs:
       cask:
