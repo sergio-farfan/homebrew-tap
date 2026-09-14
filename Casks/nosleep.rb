@@ -39,11 +39,13 @@ cask "nosleep" do
 
         xattr -dr com.apple.quarantine /Applications/NoSleep.app
 
-      Homebrew carries that approval forward on later upgrades.
+      Expect that prompt again after every `brew upgrade`: ad-hoc builds get a
+      new code identity each release, so the approval cannot carry over until
+      releases are notarized.
 
       NoSleep asks for notification permission on first launch (the session-ended
-      alert with its "Extend 1 hour" button). Ad-hoc signed releases get a new
-      code identity every build, so macOS may ask again after an update.
+      alert with its "Extend 1 hour" button); for the same reason macOS may ask
+      again after an update.
     EOS
   end
 end
