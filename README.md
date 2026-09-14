@@ -32,7 +32,8 @@ app — allow it once in **System Settings → Privacy & Security → Open Anywa
 needs the **Accessibility** permission, which macOS asks for again after each update
 (ad-hoc identities change per build).
 
-NoSleep releases are ad-hoc signed as well (same first-launch step). NoSleep asks for
+NoSleep releases are ad-hoc signed as well (same first-launch step; Homebrew ≥ 7 has no
+`--no-quarantine` option — approve once, or `xattr -dr com.apple.quarantine /Applications/NoSleep.app`). NoSleep asks for
 **notification** permission on first launch, for its session-ended alert; `brew uninstall`
 also removes its Start at Login item, and `--zap` its preferences and single-instance lock.
 

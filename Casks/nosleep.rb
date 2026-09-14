@@ -35,9 +35,11 @@ cask "nosleep" do
     <<~EOS
       NoSleep releases are ad-hoc signed and not notarized, so Gatekeeper blocks
       the first launch. Allow it once in System Settings -> Privacy & Security ->
-      "Open Anyway", then launch again; or install without quarantine:
+      "Open Anyway", then launch again; or clear the quarantine flag:
 
-        brew install --cask --no-quarantine sergio-farfan/tap/nosleep
+        xattr -dr com.apple.quarantine /Applications/NoSleep.app
+
+      Homebrew carries that approval forward on later upgrades.
 
       NoSleep asks for notification permission on first launch (the session-ended
       alert with its "Extend 1 hour" button). Ad-hoc signed releases get a new
