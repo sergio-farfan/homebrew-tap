@@ -4,7 +4,7 @@ cask "nosleep" do
 
   url "https://github.com/sergio-farfan/nosleep/releases/download/v#{version}/NoSleep-#{version}.dmg"
   name "NoSleep"
-  desc "Menu bar toggle for caffeinate that keeps the Mac awake"
+  desc "Menu bar toggle for caffeinate that prevents idle sleep"
   homepage "https://github.com/sergio-farfan/nosleep"
 
   livecheck do

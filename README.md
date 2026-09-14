@@ -25,7 +25,7 @@ Update with `brew upgrade --cask <cask>`; remove with `brew uninstall --cask --z
 | Cask | Description |
 |------|-------------|
 | [`alttab`](Casks/alttab.rb) | [AltTab](https://github.com/sergio-farfan/alttab-macos) — Windows-style window switcher for macOS |
-| [`nosleep`](Casks/nosleep.rb) | [NoSleep](https://github.com/sergio-farfan/nosleep) — menu bar toggle for `caffeinate` that keeps the Mac awake |
+| [`nosleep`](Casks/nosleep.rb) | [NoSleep](https://github.com/sergio-farfan/nosleep) — menu bar toggle for `caffeinate` that prevents idle sleep |
 
 AltTab releases are ad-hoc signed and not yet notarized: on first launch macOS blocks the
 app — allow it once in **System Settings → Privacy & Security → Open Anyway**. The app also
