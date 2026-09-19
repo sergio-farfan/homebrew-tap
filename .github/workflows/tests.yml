@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Bumps pushed by bump.yml use the job's GITHUB_TOKEN and therefore never
+  # trigger this workflow (GitHub's recursion guard) — they are validated
+  # before pushing. This lets you re-run the suite on current main on demand.
+  workflow_dispatch:
 
 permissions: {}
 
