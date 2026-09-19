@@ -118,10 +118,21 @@ jobs:
           brew install --cask "$TAP_NAME/$CASK"
           brew uninstall --cask --zap "$CASK"
 
+      # main may have moved since the runner checked out (another cask's commit);
+      # rebase first so the plain push below is a fast-forward.
+      - name: Rebase onto origin
+        if: steps.bump.outputs.changed == 'true'
+        run: git -C "${{ steps.bump.outputs.path }}" pull --rebase --autostash origin main
+
+      # NO `token:` here — setup-homebrew already installed the job token as a GLOBAL
+      # http.extraheader; a second (local) one makes git send two Authorization headers
+      # and GitHub answers HTTP 400 on every push/fetch (Homebrew's own tap-new-publish
+      # template passes the token to setup-homebrew only). Few tries: the action's
+      # backoff is 2**i nested 10x10, so a permanent failure otherwise runs for hours.
       - name: Push
         if: steps.bump.outputs.changed == 'true'
         uses: Homebrew/actions/git-try-push@f8d4222eb633e65c2a0157383cf80861fc7fae7f # 2026.09.07.1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           directory: ${{ steps.bump.outputs.path }}
           branch: main
+          tries: "3"
