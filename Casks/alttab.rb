@@ -1,6 +1,6 @@
 cask "alttab" do
-  version "1.3.3"
-  sha256 "9197d4497137749546a8d50660213b1fc54c9bd84f866997aa71a6236f37c8c8"
+  version "1.3.2"
+  sha256 "cf4d9f4eb1804ed7153ae55d2b16ba248cf2efee44675a81e7c8aee0fa7feec9"
 
   url "https://github.com/sergio-farfan/alttab-macos/releases/download/v#{version}/AltTab-#{version}.dmg"
   name "AltTab"
