@@ -49,7 +49,7 @@ jobs:
         env:
           TAP_NAME: ${{ steps.set-up-homebrew.outputs.tap-name }}
         run: |
-          for cask in alttab nosleep; do
+          for cask in alttab nosleep cidr-atlas; do
             brew install --cask "$TAP_NAME/$cask"
             brew uninstall --cask --zap "$cask"
           done
