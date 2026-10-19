@@ -40,15 +40,15 @@ cask "cidr-atlas" do
       new code identity each release, so the approval cannot carry over until
       releases are notarized.
 
-      This cask also installs the `cidrctl` command. It carries the same
-      download quarantine flag, so macOS may block its first run; allow it in
-      System Settings -> Privacy & Security, or clear the flag:
+      This cask also installs the `cidrctl` command, which is quarantined the
+      same way. Its first run shows '"cidrctl-arm64" Not Opened' (or
+      cidrctl-x86_64 on Intel): click Done, NOT "Move to Trash", then allow it in
+      System Settings -> Privacy & Security -> "Open Anyway"; or clear the flag:
 
         xattr -d com.apple.quarantine "$(readlink -f "$(brew --prefix)/bin/cidrctl")"
 
-      On a managed Mac, endpoint security software may remove the unsigned
-      executable on first run; ask your administrator to allow it, then run
-      `brew reinstall --cask cidr-atlas`.
+      If the executable was moved to the Trash, or removed by security software
+      on a managed Mac, run `brew reinstall --cask cidr-atlas` and allow it.
 
       Uninstalling, even with --zap, keeps your inventory; to delete it, export a
       backup first and remove ~/Library/Application Support/cidr_atlas yourself.

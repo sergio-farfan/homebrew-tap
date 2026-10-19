@@ -44,8 +44,9 @@ also removes its Start at Login item, and `--zap` its preferences and single-ins
 
 CIDR Atlas releases are ad-hoc signed too (same first-launch step, again after each
 `brew upgrade`). The cask also links the `cidrctl` command for your Mac's architecture;
-it is quarantined like the app, so macOS may block its first run until you allow it or
-run `xattr -d com.apple.quarantine "$(readlink -f "$(brew --prefix)/bin/cidrctl")"`.
+it is quarantined like the app: on its first run macOS reports "cidrctl-arm64" Not Opened.
+Click **Done** (not Move to Trash), then **Open Anyway** in Privacy & Security, or run
+`xattr -d com.apple.quarantine "$(readlink -f "$(brew --prefix)/bin/cidrctl")"`.
 `--zap` removes only its preferences: the inventory in
 `~/Library/Application Support/cidr_atlas`, shared by the app and `cidrctl`, is kept and
 must be deleted by hand.
