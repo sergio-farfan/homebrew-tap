@@ -7,6 +7,7 @@ Personal [Homebrew](https://brew.sh) tap for [Sergio Farfan](https://github.com/
 ```bash
 brew install --cask sergio-farfan/tap/alttab
 brew install --cask sergio-farfan/tap/nosleep
+brew install --cask sergio-farfan/tap/cidr-atlas
 ```
 
 Using the fully qualified name trusts just that cask (Homebrew ≥ 6 requires third-party
@@ -15,7 +16,7 @@ tap first — note the order, trust *before* tap:
 
 ```bash
 brew trust sergio-farfan/tap && brew tap sergio-farfan/tap
-brew install --cask alttab nosleep
+brew install --cask alttab nosleep cidr-atlas
 ```
 
 Update with `brew upgrade --cask <cask>`; remove with `brew uninstall --cask --zap <cask>`.
@@ -26,6 +27,7 @@ Update with `brew upgrade --cask <cask>`; remove with `brew uninstall --cask --z
 |------|-------------|
 | [`alttab`](Casks/alttab.rb) | [AltTab](https://github.com/sergio-farfan/alttab-macos) — Windows-style window switcher for macOS |
 | [`nosleep`](Casks/nosleep.rb) | [NoSleep](https://github.com/sergio-farfan/nosleep) — menu bar toggle for `caffeinate` that prevents idle sleep |
+| [`cidr-atlas`](Casks/cidr-atlas.rb) | [CIDR Atlas](https://github.com/sergio-farfan/cidr-atlas) — local-first CIDR inventory and allocation planner for OCI networks, with the `cidrctl` CLI |
 
 AltTab releases are ad-hoc signed and not yet notarized: on first launch macOS blocks the
 app — allow it in **System Settings → Privacy & Security → Open Anyway**. Expect that step
@@ -40,6 +42,14 @@ NoSleep releases are ad-hoc signed as well (same first-launch step; Homebrew ≥
 **notification** permission on first launch, for its session-ended alert; `brew uninstall`
 also removes its Start at Login item, and `--zap` its preferences and single-instance lock.
 
+CIDR Atlas releases are ad-hoc signed too (same first-launch step, again after each
+`brew upgrade`). The cask also links the `cidrctl` command for your Mac's architecture;
+it is quarantined like the app, so macOS may block its first run until you allow it or
+run `xattr -d com.apple.quarantine "$(readlink -f "$(brew --prefix)/bin/cidrctl")"`.
+`--zap` removes only its preferences: the inventory in
+`~/Library/Application Support/cidr_atlas`, shared by the app and `cidrctl`, is kept and
+must be deleted by hand.
+
 ## Maintenance
 
 - Every push and pull request runs [`tests.yml`](.github/workflows/tests.yml):
@@ -47,5 +57,5 @@ also removes its Start at Login item, and `--zap` its preferences and single-ins
   install/uninstall smoke test on a clean macOS runner.
 - New app releases update the cask through [`bump.yml`](.github/workflows/bump.yml): the
   app repository's release workflow sends a `repository_dispatch` (`alttab-release`,
-  `nosleep-release`) with the cask, version and sha256; the workflow runs `brew bump-cask-pr --write-only --commit`, validates,
+  `nosleep-release`, `cidr-atlas-release`) with the cask, version and sha256; the workflow runs `brew bump-cask-pr --write-only --commit`, validates,
   and pushes. It can also be run by hand from the Actions tab (`workflow_dispatch`).
